@@ -1004,7 +1004,100 @@
 		 rank-with-second-pair)
 	    rank-with-first-pair
 	    rank-with-second-pair)))
-  
+
+;; consider: make struct
+(defun board-p (obj)
+  (and (listp obj)
+       (every 'card-p obj)
+       (= 5 (length (remove-duplicates obj)))))
+
+(defun make-board (first-card second-card third-card fourth-card fifth-card)
+  (list first-card second-card third-card fourth-card fifth-card))
+
+(defun board-first-card (board)
+  (first board))
+
+(defun board-second-card (board)
+  (second board))
+
+(defun board-third-card (board)
+  (third board))
+
+(defun board-fourth-card (board)
+  (fourth board))
+
+(defun board-fifth-card (board)
+  (fourth board))
+
+(defun board-flop (board)
+  (subseq board 0 3))
+
+(defun board-turn (board)
+  (board-fourth-card board))
+
+(defun board-river (board)
+  (board-fifth-card board))
+
+(defun make-list-of-all-boards ()
+  (let ((list-of-all-boards '())
+	(deck *list-of-cards*))
+    (dolist (first-card deck)
+      (let* ((deck-without-first-card (remove first-card deck))
+	     (deck deck-without-first-card))
+	(dolist (second-card deck)
+	  (let* ((deck-without-second-card (remove second-card deck))
+		 (deck deck-without-second-card))
+	    (dolist (third-card deck)
+	      (let* ((deck-without-third-card (remove third-card deck))
+		     (deck deck-without-third-card))
+		(dolist (fourth-card deck)
+		  (let* ((deck-without-fourth-card (remove fourth-card deck))
+			 (deck deck-without-fourth-card))
+		    (dolist (fifth-card deck)
+		      (let ((board (make-board first-card second-card third-card fourth-card fifth-card)))
+			(push board list-of-all-boards)))))))))))
+    list-of-all-boards))
+    
+(defparameter *list-of-all-boards* (read-list-of-all-boards-from-file))
+
+(defun list-of-all-boards ()
+  *list-of-all-boards*)
+
+(defun read-list-of-all-boards-from-file ()
+  (let ((list-of-all-boards '()))
+    (with-open-file (stream "example-file-that-contains-list-of-all-boards")
+      (with-standard-io-syntax
+	(setf list-of-all-boards (read stream))))
+    list-of-all-boards))
+
+(defun board-contains-card? (board card)
+  (member card board))
+
+(defun possible-boards-given-two-cards (card1 card2)
+  (let* ((list-of-all-boards (list-of-all-boards))
+	 (boards-that-lack-both-cards (remove-if #'(lambda (board)
+						     (and
+						      (board-contains-card? card1)
+						      (board-contains-card? card2)))
+						 list-of-all-boards))
+	 (possible-boards-given-two-cards boards-that-lack-both-cards))
+    possible-boards-given-two-cards))
+
+;; (defun number-of-cards-in-deck-from-player-perspective-before-flop ()
+;;   (- 
+
+;; (defun probability-to-flop-pair-given-two-cards-that-are-not-a-pair ()
+;;   (let* ((number-of-cards-in-deck
+
+
+
+
+
+
+
+
+
+
 #+ignore
   (let ((hand-contains-only-cards-with-suit? t))
     (dolist (card hand)
@@ -1092,3 +1185,15 @@
 ;;        (setf hand-a-four-of-a-kind-rank-better?
 ;; 	     (hand-four-of-a-kind-kicker-better? hand-a hand-b))))
 ;;     hand-a-four-of-a-kind-rank-better?))
+
+;; discarded because I can iterate through boards once
+;; (defun possible-boards-given-two-cards (card1 card2)
+;;   (let* ((list-of-all-boards (list-of-all-boards))
+;; 	 (boards-that-lack-card1 (remove-if #'(lambda (board)
+;; 					       (board-contains-card? card1))
+;; 					   list-of-all-boards))
+;; 	 (boards-that-lack-both-cards (remove-if #'(lambda (board)
+;; 						     (board-contains-card? card2))
+;; 						 boards-that-lack-card1))
+;; 	 (possible-boards-given-two-cards boards-that-lack-both-cards))
+;;     possible-boards-given-two-cards))
